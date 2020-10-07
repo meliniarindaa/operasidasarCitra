@@ -1,0 +1,195 @@
+package konvolusi;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+public class Konvolusi {
+public static void main(String[] args) throws IOException {
+   BufferedImage img = null;
+       String Filename = "mee.jpg";
+       
+       try {
+       
+           img = ImageIO.read(new File(Filename));      
+       } 
+       catch (IOException e){
+           System.out.println("Error: "+e);
+       }
+       int tinggi = img.getHeight();
+       int lebar=img.getWidth();
+       
+   
+    int warna, red, green, blue, alpha, tempwarna, hasilR, hasilG, hasilB, hasilabu, parG, parP;
+    String tampil;
+    int k,l,i,j;
+    
+    double hasil_kolerasi, hasil_konvolusi, hasilCX, hasilCY, hasilSX, hasilSY, hasilPX, hasilPY;
+    int m,n; //kernel 3x3
+    double kernelCX[][];
+    double kernelCY[][];
+    double kernelSX[][];
+    double kernelSY[][];
+    double kernelPX[][];
+    double kernelPY[][];
+    
+    
+    BufferedImage bufferedImage = new BufferedImage(lebar,tinggi, BufferedImage.TYPE_INT_RGB);
+      
+      
+        //ukuran kernel
+        m=3;n=3;
+        //deklarasi kernel
+        kernelCX= new double[m+1][n+1];
+        kernelCY= new double[m+1][n+1];
+        kernelSX= new double[m+1][n+1];
+        kernelSY= new double[m+1][n+1];
+        kernelPX= new double[m+1][n+1];
+        kernelPY= new double[m+1][n+1];
+        
+        //kernel canny X dan Y
+        kernelCX[1][1]=1; kernelCX[1][2]=1; kernelCX[1][3]=1;
+        kernelCX[2][1]=1; kernelCX[2][2]=-8; kernelCX[2][3]=1;
+        kernelCX[3][1]=1; kernelCX[3][2]=1; kernelCX[3][3]=1;
+        
+        kernelCY[1][1]=-1; kernelCY[1][2]=2; kernelCY[1][3]=-1;
+        kernelCY[2][1]=2; kernelCY[2][2]=-4; kernelCY[2][3]=2;
+        kernelCY[3][1]=-1; kernelCY[3][2]=2; kernelCY[3][3]=-1;
+        
+        //kernel sobel X dan Y
+        kernelSX[1][1]=-1; kernelSX[1][2]=0; kernelSX[1][3]=1;
+        kernelSX[2][1]=-2; kernelSX[2][2]=0; kernelSX[2][3]=2;
+        kernelSX[3][1]=-1; kernelSX[3][2]=0; kernelSX[3][3]=1;
+        
+        kernelSY[1][1]=1; kernelSY[1][2]=2; kernelSY[1][3]=1;
+        kernelSY[2][1]=0; kernelSY[2][2]=0; kernelSY[2][3]=0;
+        kernelSY[3][1]=-1; kernelSY[3][2]=-2; kernelSY[3][3]=-1;
+        
+        //kernel prewit X dan Y
+        kernelPX[1][1]=-1; kernelPX[1][2]=0; kernelPX[1][3]=1;
+        kernelPX[2][1]=-1; kernelPX[2][2]=0; kernelPX[2][3]=1;
+        kernelPX[3][1]=-1; kernelPX[3][2]=0; kernelPX[3][3]=1;
+        
+        kernelPY[1][1]=1; kernelPY[1][2]=1; kernelPY[1][3]=1;
+        kernelPY[2][1]=0; kernelPY[2][2]=0; kernelPY[2][3]=0;
+        kernelPY[3][1]=-1; kernelPY[3][2]=-1; kernelPY[3][3]=-1; 
+        
+        
+        int[]pixels = new int[lebar*tinggi];//tentukan panjang array pixels
+        //deklarasi bitmap
+        int [][] bitmapRed = new int[lebar][tinggi];
+        int [][] bitmapGreen = new int[lebar][tinggi];
+        int [][] bitmapBlue = new int[lebar][tinggi];
+        int [][] bitmapAbu = new int[lebar][tinggi];
+        int [][] bitmapCanny= new int[lebar][tinggi];
+        int [][] bitmapSobel= new int[lebar][tinggi];
+        int [][] bitmapPrewit= new int[lebar][tinggi];
+     
+        for ( i = 0; i < lebar; i++) {
+            for ( j = 0; j < tinggi; j++) {
+       Color c = new Color(img.getRGB(i, j));
+                red= c.getRed();
+                green=c.getGreen();
+                blue=c.getBlue();
+                //grayscale
+                bitmapAbu[i][j]=((red+green+blue)/3);
+            }
+        }
+ 
+        
+        //konvolusi canny
+        for ( i = 1; i < lebar-1; i++) {
+            for ( j = 1; j < tinggi-1; j++) {
+                bitmapCanny[i-1][j-1]=0;
+                hasilCX=0;
+                hasilCY=0;
+                for (k = 1;  k<=n; k++) {
+                    for (l = 1;  l<= m; l++) {
+                        hasilCX = hasilCX + (bitmapAbu[i-(l-3+1)][j-(k-3+1)]*kernelCX[k][l]);
+                        hasilCY = hasilCY + (bitmapAbu[i-(l-3+1)][j-(k-3+1)]*kernelCY[k][l]);
+                    }
+                }
+               
+                if (hasilCX > hasilCY){
+                    bitmapCanny[i-1][j-1]=(int)hasilCX;
+                }else{
+                    bitmapCanny[i-1][j-1]=(int)hasilCY;
+                }
+                if(bitmapCanny[i-1][j-1]< 0){
+                    bitmapCanny[i-1][j-1]= 0;
+                }else if(bitmapCanny[i-1][j-1] > 255){
+                    bitmapCanny[i-1][j-1] = 255;
+                }
+                
+            }
+        }
+        
+        //konvolusi sobel
+        for ( i = 1; i < lebar-1; i++) {
+            for ( j = 1; j < tinggi-1; j++) {
+                bitmapSobel[i-1][j-1]=0;
+                hasilSX=0;
+                hasilSY=0;
+                for (k = 1;  k<=n; k++) {
+                    for (l = 1;  l<= m; l++) {
+                        hasilSX = hasilSX + (bitmapAbu[i-(l-3+1)][j-(k-3+1)]*kernelSX[k][l]);
+                        hasilSY = hasilSY + (bitmapAbu[i-(l-3+1)][j-(k-3+1)]*kernelSY[k][l]);
+                    }
+                }
+               
+                if (hasilSX > hasilSY){
+                    bitmapSobel[i-1][j-1]=(int)hasilSX;
+                }else{
+                    bitmapSobel[i-1][j-1]=(int)hasilSY;
+                }
+                if(bitmapSobel[i-1][j-1]< 0){
+                    bitmapSobel[i-1][j-1]= 0;
+                }else if(bitmapSobel[i-1][j-1] > 255){
+                    bitmapSobel[i-1][j-1] = 255;
+                }
+                
+            }
+        }
+        
+        //konvolusi prewit
+        for ( i = 1; i < lebar-1; i++) {
+            for ( j = 1; j < tinggi-1; j++) {
+                bitmapPrewit[i-1][j-1]=0;
+                hasilPX=0;
+                hasilPY=0;
+                for (k = 1;  k<=n; k++) {
+                    for (l = 1;  l<= m; l++) {
+                        hasilPX = hasilPX + (bitmapAbu[i-(l-3+1)][j-(k-3+1)]*kernelPX[k][l]);
+                        hasilPY = hasilPY + (bitmapAbu[i-(l-3+1)][j-(k-3+1)]*kernelPY[k][l]);
+                    }
+                }
+               
+                if (hasilPX > hasilPY){
+                    bitmapPrewit[i-1][j-1]=(int)hasilPX;
+                }else{
+                    bitmapPrewit[i-1][j-1]=(int)hasilPY;
+                }
+                if(bitmapPrewit[i-1][j-1]< 0){
+                    bitmapPrewit[i-1][j-1]= 0;
+                }else if(bitmapPrewit[i-1][j-1] > 255){
+                    bitmapPrewit[i-1][j-1] = 255;
+                }
+                
+            }
+        }
+
+        
+        for ( i = 1; i < lebar-1; i++) {
+            for ( j = 1; j < tinggi-1; j++) {
+                //abu2
+                Color Konvolusi= new Color(bitmapPrewit[i-1][j-1], bitmapPrewit[i-1][j-1], bitmapPrewit[i-1][j-1]);
+                bufferedImage.setRGB(i-1,j-1,Konvolusi.getRGB());
+            }
+        }
+       
+        File file = new File("konvolusiSobel.jpg");
+        ImageIO.write(bufferedImage, "jpg", file);
+    }
+}
