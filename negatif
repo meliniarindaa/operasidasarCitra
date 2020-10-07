@@ -1,0 +1,54 @@
+package operasicitra;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+public class negatif {
+    public static void main(String[] args) throws IOException {
+         BufferedImage img = null;
+       String fileName = "mee.jpg";
+       
+       try {
+           //Read in new image file
+           img = ImageIO.read(new File(fileName));    
+       } 
+       catch (IOException e){
+           System.out.println("Error: "+e);
+       }
+       int h=img.getHeight();
+       int w=img.getWidth();
+       
+       
+       BufferedImage bufferedImage = new BufferedImage(w,h, BufferedImage.TYPE_INT_RGB);
+
+       if (img == null) {
+             System.out.println("No image loaded");
+        } 
+       else {
+           for(int i=0;i<w;i++)
+           {
+               for(int j=0;j<h;j++)
+               {
+           
+               Color negatif= new Color(img.getRGB(i,j));
+               int r = negatif.getRed();
+               int g = negatif.getGreen();
+               int b = negatif.getBlue();
+               
+               int abu = (r+g+b)/3;
+               int n= 255-abu;
+               
+               Color x = new Color(n,n,n);
+               bufferedImage.setRGB(i, j, x.getRGB());
+                }  
+            }
+        }
+       
+       
+        File file = new File("negatif.jpg");
+        ImageIO.write(bufferedImage, "jpg", file);
+}
+}
