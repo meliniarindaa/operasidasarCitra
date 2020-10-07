@@ -1,0 +1,51 @@
+package operasicitra;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+public class rotasi {
+    public static void main(String[] args) throws IOException {
+         BufferedImage img = null;
+       String fileName = "mee.jpg";
+       
+       try {
+           //Read in new image file
+           img = ImageIO.read(new File(fileName));    
+       } 
+       catch (IOException e){
+           System.out.println("Error: "+e);
+       }
+       int h=img.getHeight();
+       int w=img.getWidth();
+       
+       
+       BufferedImage bufferedImage = new BufferedImage(w,h, BufferedImage.TYPE_INT_RGB);
+       
+       
+       int hh;
+       int ww;
+       if (img == null) {
+             System.out.println("No image loaded");
+        } 
+       else {
+           for(int i=0;i<w;i++)
+           {
+               hh=h-1;
+               
+               for(int j=0;j<h;j++)
+               {
+                   
+                   bufferedImage.setRGB(i, hh, img.getRGB(i,j));
+                   hh--;
+                }  
+               
+            }
+        }
+       
+       
+        File file = new File("rotasi.jpg");
+        ImageIO.write(bufferedImage, "jpg", file);
+    }
+}
